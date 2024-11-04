@@ -1,101 +1,184 @@
-import Image from "next/image";
+'use client'
+
+import { useState } from 'react'
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import {
+  Bar, BarChart, XAxis, YAxis, ResponsiveContainer, CartesianGrid, PolarGrid, PolarRadiusAxis, RadialBar, RadialBarChart,
+} from "recharts"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+
+interface Emotion {
+  sadness: number;
+  joy: number;
+  fear: number;
+  disgust: number;
+  anger: number;
+}
+
+interface Sentiment {
+  score: number;
+  label: string;
+}
+
+interface Keyword {
+  text: string;
+  sentiment: Sentiment;
+  relevance: number;
+  emotion: Emotion;
+  count: number;
+}
+
+interface Usage {
+  text_units: number;
+  text_characters: number;
+  features: number;
+}
+
+interface AnalysisResult {
+  usage: Usage;
+  language: string;
+  keywords: Keyword[];
+  entities: any[];
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [text, setText] = useState('')
+  const [result, setResult] = useState<AnalysisResult | null>(null)
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  const handleCheck = async () => {
+    try {
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text }),
+      })
+      const data: AnalysisResult = await response.json()
+      setResult(data)
+    } catch (err) {
+      console.error('Error:', err)
+      setResult(null)
+    }
+  }
+
+  return (
+    <div className="w-full max-w-4xl mx-auto mt-10 space-y-8">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-center">Emotional Tone Checker for Text</CardTitle>
+          <CardDescription className="text-center">
+            Enter your text below to analyze its emotional tone
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <Textarea
+              placeholder="Enter your text here (up to 500 words)"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              className="w-full h-40"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+            <Button onClick={handleCheck} className="w-full">
+              Analyze Emotional Tone
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+      {result && result.keywords && result.keywords.map((keyword, index) => (
+        <Card key={index}>
+          <CardHeader>
+            <CardTitle className="text-xl font-bold text-center">
+              Fragment analyzed: "{keyword.text}"
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="h-[300px]">
+                <h3 className="text-lg font-semibold mb-2 text-center">Emotions</h3>
+                <ChartContainer
+                  config={{
+                    emotion: {
+                      label: "Emotion Score",
+                      color: "hsl(var(--chart-1))",
+                    },
+                  }}
+                  className="h-full"
+                >
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={Object.entries(keyword.emotion).map(([name, value]) => ({ name, value }))} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="value" fill="var(--color-emotion)" radius={6} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </div>
+              <div className="h-[300px]">
+                <h3 className="text-lg font-semibold mb-2 text-center">Sentiment</h3>
+                <ChartContainer
+                  config={{
+                    sentiment: {
+                      label: "Sentiment Score",
+                    },
+                  }}
+                  className="h-full"
+                >
+                  <RadialBarChart
+                    data={[{ sentiment: Math.abs(keyword.sentiment.score) }]}
+                    startAngle={0}
+                    endAngle={360 * keyword.sentiment.score}
+                    innerRadius={80}
+                    outerRadius={110}
+                  >
+                    <PolarGrid
+                      gridType="circle"
+                      radialLines={false}
+                      stroke="none"
+                      className="first:fill-muted last:fill-background"
+                      polarRadius={[86, 74]}
+                    />
+                    <PolarRadiusAxis
+                      angle={90}
+                      domain={[0, 1]}
+                      tick={false}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <RadialBar
+                      dataKey="sentiment"
+                      background
+                      cornerRadius={10}
+                    />
+                    <text
+                      x="50%"
+                      y="50%"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-foreground text-3xl font-bold"
+                    >
+                      {keyword.sentiment.score.toFixed(2)}
+                    </text>
+                    <text
+                      x="50%"
+                      y="56%"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-muted-foreground text-sm"
+                    >
+                      {keyword.sentiment.label}
+                    </text>
+                  </RadialBarChart>
+                </ChartContainer>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
-  );
+  )
 }
