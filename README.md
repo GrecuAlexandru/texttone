@@ -57,7 +57,7 @@ I had a wonderful day today! The weather was perfect, and I spent the afternoon 
 ```
 
 Here is a screenshot of the project in action:
-[Screenshot](docs/screenshot.png)
+![Screenshot](docs/screenshot.png)
 
 ## Built With
 
